@@ -15,14 +15,15 @@ contract GameNumberTest is Test {
 
     function setUp() public {
         //mainnetFork = vm.createFork(MAINNET_RPC_URL);
-        vm.deal(address(this), 5 ether);
-        alice = makeAddr("alice");
         //bob= makeAddr("bob");
+        alice = makeAddr("alice");
+        bob = makeAddr("bob");
         vm.deal(alice, 10 ether);
-        vm.startPrank(alice);
-        gameNumber = new GameNumber(2 ether, 1 ether, 5 ether);
+        vm.deal(bob, 10 ether);
+        vm.startPrank(alice);   
+        gameNumber = new GameNumber(2 ether, 1 ether, 10 ether);
         gameNumber.startNewGame();
-        
+        vm.deal(address(gameNumber), 2 ether);
     }
 
 
@@ -36,10 +37,11 @@ contract GameNumberTest is Test {
     function testClaimReward() public {
         console2.log("Balance Alice", alice.balance);
         uint256 targetNumber = gameNumber.getTargetNumber();
-        gameNumber.makeGuess{value: gameNumber.bet()}(targetNumber);
+        gameNumber.makeGuess{value: gameNumber.bet()}(targetNumber);//se hace la apuesta pasando el valor de bet(la funcion es payable) y el numero
         assertEq(gameNumber.winner(), alice);
         console2.log("Balance Alice", alice.balance);
         assertEq(alice.balance, 9 ether);
+        //gameNumber.makeGuess{value: gameNumber.bet()}(2);//se hace la apuesta pasando el valor de bet(la funcion es payable) y el numero
         console2.log("AddressAlice", alice);
         console2.log("Winner", gameNumber.winner());
         console2.log("Supply", gameNumber.ethSupply());
@@ -47,6 +49,7 @@ contract GameNumberTest is Test {
         console2.log("Bet", gameNumber.bet());
         console2.log("Reward", gameNumber.reward());
         assertEq(alice.balance, 11*1e18);
+        
     }
 
 /*
@@ -62,11 +65,17 @@ contract GameNumberTest is Test {
 
     function testStartNewGame() public {
 
+        console2.log("Start new game");
         gameNumber.startNewGame();
-
-        console.log("Start new game");
-
+        console2.log("Endgame", gameNumber.endGame());
+        vm.expectRevert("El juego no ha terminado");
+        gameNumber.startNewGame();
+        vm.stopPrank();
+        vm.startPrank(bob);
+        vm.expectRevert("NotOwner");
+        gameNumber.startNewGame();
     }
+
 
 
     /*function testMakeGuess() public {

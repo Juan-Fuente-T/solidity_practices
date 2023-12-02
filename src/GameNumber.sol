@@ -47,11 +47,12 @@ contract GameNumber{
         bet = _bet;
         owner = msg.sender;
         ethSupply = _initialSupply;
+        endGame = true;
     }
 
     function startNewGame() public{
         require(msg.sender == owner, "NotOwner");
-        require(!endGame, "El juego no ha terminado");
+        require(endGame = true, "El juego no ha terminado");
         //blockNumber = block.number;
         blockNumber = 123456789;
         //targetNumber = uint256(blockhash(blockNumber)) % 10; 
@@ -77,7 +78,7 @@ contract GameNumber{
     function claimReward() public{
         require(winner == msg.sender, "No eres el ganador");
         require(endGame, "El juego aun no ha terminado o no has sido el ganador");
-        payable(winner).transfer(reward);//para poder enviar ether siempre hay que hacerlo payable
+        payable(msg.sender).transfer(reward);//para poder enviar ether siempre hay que hacerlo payable
         ethSupply -= reward;
     }
 

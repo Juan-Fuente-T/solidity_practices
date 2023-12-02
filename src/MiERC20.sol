@@ -37,6 +37,9 @@ contract MiERC20 is ERC20("MiERC20", "ME20", 18){
     address creator;
 
     event Genesis(address indexed creator);
+    event Mint(address indexed to, uint256 amount);
+    event Burn(uint256 amount);
+
     constructor(){
         creator = msg.sender;
         _mint(creator, 1000000);
@@ -48,5 +51,12 @@ contract MiERC20 is ERC20("MiERC20", "ME20", 18){
         require(to != address(0), "Address can't be 0");
         require(amount > 0, "Amount is not enougt");
         _mint(to, amount);
+        emit Mint(to, amount);
+
+    }
+    function burn(address from, uint256 amount) public {
+        require(amount > 0, "Amount is not enougt");
+        _burn(from, amount);
+        emit Burn(amount);
     }
 }
