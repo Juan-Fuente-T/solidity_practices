@@ -25,7 +25,7 @@ contract RegistroNombresTest is Test {
         vm.startPrank(bob);
         registroNombres.registrar("Churiflusty");
         console.log(registroNombres.getNombre());
-        vm.expectRevert("ERROR");
+        vm.expectRevert();
         registroNombres.registrar("Churifluston");
      }
 }

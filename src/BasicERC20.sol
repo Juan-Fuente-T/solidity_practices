@@ -17,7 +17,7 @@ contract BasicERC20{
     error InsuficientAllowance();
 
     mapping (address => uint256) public balances;
-    mapping (address => uint256) public allowance;
+    mapping (address => mapping(address => uint256)) public allowance;
 
     constructor(){
         name = "Tokencito";
@@ -28,7 +28,7 @@ contract BasicERC20{
     }
 
     function approve(address _to, uint256 _amount) public{
-        allowance[_to] += _amount;
+        allowance[_to] [msg.sender]+= _amount;
     }
 
     function transfer(address to, uint256 amount) public returns(bool success) {
@@ -42,16 +42,16 @@ contract BasicERC20{
         require(to != address(0), "El destino no puede ser la address 0");
         require(from != address(0), "El origen no puede ser la address 0");
         require(balances[from] >= amount, "Balance insuficiente");
-        if (allowance[from] < amount){
+        if (allowance[from] [msg.sender]< amount){
             revert InsuficientAllowance();
         }
-        console.log("balance msg.sender", balances[msg.sender]);
+        /*console.log("balance msg.sender", balances[msg.sender]);
         console.log("balance to", balances[to]);
         console.log("balance from", balances[from]);
-        console.log("amount", amount);
+        console.log("amount", amount);*/
         balances[from] -= amount;
         balances[to] += amount;
-        allowance[to] -= amount;
+        allowance[from][msg.sender]-= amount;
         return true;
     }
 

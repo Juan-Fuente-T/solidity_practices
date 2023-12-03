@@ -30,7 +30,7 @@ contract MiERC20Test is Test {
     event Burn(uint256 amount);
 
     function setUp() public {
-        miERC20 = new MiERC20();
+        miERC20 = new MiERC20("MiERC20", "MERC20", 18);
         alice = makeAddr("alice");
     }
 
