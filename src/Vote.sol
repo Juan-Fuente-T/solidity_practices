@@ -15,47 +15,46 @@ f. Una función closeVoting() que permitirá al owner del contrato cerrar la vot
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.21;
 
-contract Vote{
-    struct Candidate{
+contract Vote {
+    struct Candidate {
         string name;
         uint256 votes;
     }
 
-    modifier onlyOwner(){
+    modifier onlyOwner() {
         require(msg.sender == owner, "Only owner can call this function");
         _;
     }
 
-    mapping (address => bool) public voters;
+    mapping(address => bool) public voters;
     Candidate[] public candidates;
 
     bool public votingOpen;
     address owner;
 
-    constructor(){
+    constructor() {
         owner = msg.sender;
         votingOpen = true;
-        
     }
-    function setCandidate(string memory _name) external{
+
+    function setCandidate(string memory _name) external {
         require(votingOpen == true, "Voting is not open");
         candidates.push(Candidate(_name, 0));
     }
-    function vote(uint8 _candidate) external{
+
+    function vote(uint8 _candidate) external {
         require(votingOpen, "The voted is closed");
         require(!voters[msg.sender], "You have already voted");
         candidates[_candidate].votes += 1;
         voters[msg.sender] = true;
     }
 
-    function closeVoting() external onlyOwner{
+    function closeVoting() external onlyOwner {
         votingOpen = false;
     }
 
-    function getVotes(uint8 _candidate) external view returns(uint256){
+    function getVotes(uint8 _candidate) external view returns (uint256) {
         require(_candidate < candidates.length, "Ese candidato no existe");
         return candidates[_candidate].votes;
     }
-    
 }
-

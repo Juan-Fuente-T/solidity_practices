@@ -20,10 +20,10 @@ pragma solidity ^0.8.19;
 import {ERC20} from "lib/forge-std/src/ERC20.sol";
 
 import {Test, console2} from "lib/forge-std/src/Test.sol";
-import {MiERC20} from "../src/MiERC20.sol";
+import {MiERC20Plantilla} from "../src/MiERC20Plantilla.sol";
 
-contract MiERC20Test is Test {
-    MiERC20 public miERC20;
+contract MiERC20PlantillaTest is Test {
+    MiERC20Plantilla public miERC20Plantilla;
     address alice;
 
     event Genesis(address indexed creator);
@@ -31,57 +31,55 @@ contract MiERC20Test is Test {
     event Burn(uint256 amount);
 
     function setUp() public {
-        miERC20 = new MiERC20("MiERC20", "MERC20", 18);
+        miERC20Plantilla = new MiERC20Plantilla("ERCPlantilla", "ERCP", 18);
         alice = makeAddr("alice");
     }
 
-    function testMiERC20mint() public {
-        assertEq(miERC20.totalSupply(), 1000000);
-        console2.log("BalanceOwner", miERC20.balanceOf(address(this)));
-        assertEq(miERC20.balanceOf(address(this)), 1000000);
+    function testmiERC20Plantillamint() public {
+        assertEq(miERC20Plantilla.totalSupply(), 1000000);
+        console2.log("BalanceOwner", miERC20Plantilla.balanceOf(address(this)));
+        assertEq(miERC20Plantilla.balanceOf(address(this)), 1000000);
         vm.startPrank(alice);
-        miERC20.mint(alice, 20);
+        miERC20Plantilla.mint(alice, 20);
         vm.expectRevert("Address can't be 0");
-        miERC20.mint(address(0), 20);
+        miERC20Plantilla.mint(address(0), 20);
         vm.expectRevert("Amount is not enougt");
-        miERC20.mint(alice, 0);
-        console2.log("Balance alice", miERC20.balanceOf(alice));
-        assertEq(miERC20.balanceOf(alice), 20);
+        miERC20Plantilla.mint(alice, 0);
+        console2.log("Balance alice", miERC20Plantilla.balanceOf(alice));
+        assertEq(miERC20Plantilla.balanceOf(alice), 20);
     }
 
-    function testMiERC20EmitsMint() public {
-        //FALLA
+    function testmiERC20PlantillaEmitsMint() public {
         vm.startPrank(alice);
-
-        // Check that the topics 1 and the data are the same as the following emitted event
+        //Chequear que los topics sean los mismos que los que tenga el evento
         vm.expectEmit();
-
-        // The event we expect
+        // El evento que se espera
         emit Mint(alice, 20);
-
-        // Call the mint function of the contract
-        miERC20.mint(alice, 20);
+        miERC20Plantilla.mint(alice, 20);
     }
 
-    function testMiERC20burn() public {
+    function testmiERC20Plantillaburn() public {
         vm.startPrank(alice);
-        miERC20.mint(alice, 20);
-        console2.log("Balance alice antes", miERC20.balanceOf(alice));
-        assertEq(miERC20.balanceOf(alice), 20);
+        miERC20Plantilla.mint(alice, 20);
+        console2.log("Balance alice antes", miERC20Plantilla.balanceOf(alice));
+        assertEq(miERC20Plantilla.balanceOf(alice), 20);
         //vm.expectEmit(true, true);
-        //emit miERC20.Burn(alice, 10);
-        miERC20.burn(10);
-        console2.log("Balance alice despues", miERC20.balanceOf(alice));
-        assertEq(miERC20.balanceOf(alice), 10);
+        //emit miERC20Plantilla.Burn(alice, 10);
+        miERC20Plantilla.burn(10);
+        console2.log(
+            "Balance alice despues",
+            miERC20Plantilla.balanceOf(alice)
+        );
+        assertEq(miERC20Plantilla.balanceOf(alice), 10);
         vm.expectRevert("Amount is not enougt");
-        miERC20.burn(0);
+        miERC20Plantilla.burn(0);
     }
 
-    function testMiERC20EmitsBurn() public {
+    function testmiERC20PlantillaEmitsBurn() public {
         //FALLA
         vm.startPrank(alice);
         vm.expectEmit();
         emit Burn(10);
-        miERC20.burn(10);
+        miERC20Plantilla.burn(10);
     }
 }

@@ -9,7 +9,6 @@ contract HolaTest is Test {
 
     function setUp() public {
         hola = new Hola();
-
     }
 
     function testHola() public {

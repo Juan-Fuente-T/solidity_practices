@@ -21,16 +21,13 @@ pragma solidity ^0.8.13;
 
 import {ERC20} from "lib/forge-std/src/ERC20.sol";
 import {console} from "lib/forge-std/src/Test.sol";
-interface IERC20{
-    function transferFrom(
-        address from,
-        address to,
-        uint256 amount
-    ) external returns (bool);
-    function approve(address spender, uint256 amount) external returns (bool); 
+
+interface IERC20 {
+    function transferFrom(address from, address to, uint256 amount) external returns (bool);
+    function approve(address spender, uint256 amount) external returns (bool);
 }
 
-contract GameNumber{
+contract GameNumber {
     address owner;
     address public winner;
     uint256 public ethSupply;
@@ -40,7 +37,7 @@ contract GameNumber{
     uint256 targetNumber;
     bool public endGame;
 
-
+    error DebeSerMayorQueCero();
 
     constructor(uint256 _reward, uint256 _bet, uint256 _initialSupply) {
         reward = _reward;
@@ -50,47 +47,48 @@ contract GameNumber{
         endGame = true;
     }
 
-    function startNewGame() public{
+    function startNewGame() public {
         require(msg.sender == owner, "NotOwner");
         require(endGame = true, "El juego no ha terminado");
         //blockNumber = block.number;
         blockNumber = 123456789;
-        //targetNumber = uint256(blockhash(blockNumber)) % 10; 
+        //targetNumber = uint256(blockhash(blockNumber)) % 10;
         //targetNumber = block.number % 10;
-        targetNumber = 7; 
+        targetNumber = 7;
         endGame = false;
         winner = address(0x0);
     }
 
-    function makeGuess(uint256 _targetNumber) public payable{
-        require(_targetNumber > 0 && targetNumber < 10, "ChooseAnotherNumber");
+    function makeGuess(uint256 _targetNumber) public payable {
+        if (_targetNumber == 0) {
+            revert DebeSerMayorQueCero();
+        }
+        //require(_targetNumber > 0 && targetNumber < 10, "ChooseAnotherNumber");
         //bool sent = IERC20(msg.sender).transferFrom(msg.sender, address(this), reward);
         //recuerda se puede obtener ether nativo de una address si esa no toma la iniciativa y usa transfer, send o call
         //require(sent, "FailTransaction");
         require(msg.value >= bet, "The bet is not enought");
         ethSupply += msg.value;
-        if (_targetNumber == targetNumber){
+        if (_targetNumber == targetNumber) {
             winner = msg.sender;
             endGame = true;
         }
     }
 
-    function claimReward() public{
+    function claimReward() public {
         require(winner == msg.sender, "No eres el ganador");
         require(endGame, "El juego aun no ha terminado o no has sido el ganador");
-        payable(msg.sender).transfer(reward);//para poder enviar ether siempre hay que hacerlo payable
+        payable(msg.sender).transfer(reward); //para poder enviar ether siempre hay que hacerlo payable
         ethSupply -= reward;
     }
 
-    function getTargetNumber() public view returns(uint256){
+    function getTargetNumber() public view returns (uint256) {
         return targetNumber;
     }
 
-   receive() external payable {
- 
-   }
-   fallback() external payable {
+    receive() external payable {}
+    fallback() external payable {
         // Reenvía el Ether al propietario del contrato
         //payable(owner).transfer(msg.value);
-}
+    }
 }

@@ -5,12 +5,11 @@ import {Test, console2} from "forge-std/Test.sol";
 import {Vote} from "../src/Vote.sol";
 
 contract CounterTest is Test {
-    
-    struct Candidate{
+    struct Candidate {
         string name;
         uint256 votes;
     }
-    
+
     Vote public vote;
 
     function setUp() public {
@@ -18,7 +17,7 @@ contract CounterTest is Test {
         vote.setCandidate("Cuarzo");
         vote.setCandidate("Feldespato");
         vote.setCandidate("Mico");
-     }
+    }
 
     function testVote_vote() public {
         vote.vote(1);
@@ -29,6 +28,7 @@ contract CounterTest is Test {
         vm.expectRevert("You have already voted");
         vote.vote(0);
     }
+
     function testVote_closingVote() public {
         vote.closeVoting();
         assertEq(vote.votingOpen(), false);
@@ -36,15 +36,3 @@ contract CounterTest is Test {
         vote.vote(2);
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-

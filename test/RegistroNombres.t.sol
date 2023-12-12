@@ -8,12 +8,13 @@ contract RegistroNombresTest is Test {
     RegistroNombres public registroNombres;
     address alice;
     address bob;
-     error  NombreNoDisponible();
+
+    error NombreNoDisponible();
 
     function setUp() public {
         registroNombres = new RegistroNombres();
         alice = makeAddr("alice");
-        bob= makeAddr("bob");
+        bob = makeAddr("bob");
         //vm.deal(alice, 10 ether);
         vm.startPrank(alice);
     }
@@ -27,5 +28,5 @@ contract RegistroNombresTest is Test {
         console.log(registroNombres.getNombre());
         vm.expectRevert();
         registroNombres.registrar("Churifluston");
-     }
+    }
 }

@@ -31,69 +31,33 @@ correctamente utilizando expectEmit(
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.19;
 
-contract MiERC20 {
+import "../lib/forge-std/src/ERC20.sol";
+
+contract MiERC20Plantilla is ERC20("ERCPlantilla", "ERCP", 18) {
     address creator;
-    string public name;
-    string public symbol;
-    uint256 public decimals;
 
     event Genesis(address indexed creator);
     event Mint(address indexed to, uint256 amount);
     event Burn(uint256 amount);
-    event Transfer(address indexed sender, address indexed recipient, uint256 amount);
-    event Approval(address indexed sender, address indexed approved, uint256 amount);
 
-    uint256 public totalSupply;
-    mapping(address => uint256) public balanceOf;
-    mapping(address => mapping(address => uint256)) public allowance;
-
-    constructor(string memory _name, string memory _symbol, uint256 _decimals) {
-        name = _name;
-        symbol = _symbol;
-        decimals = _decimals;
+    constructor() {
         creator = msg.sender;
-        balanceOf[creator] += 1000000;
-        totalSupply += 1000000;
+        //balanceOf[creator] += 1000000 *1e18;
+        //totalSupply += 1000000 *1e18;
+        _mint(creator, 1000000 * 1e18);
         emit Genesis(creator);
-    }
-
-    function transfer(address recipient, uint256 amount) external returns (bool) {
-        require(amount > 0 && balanceOf[msg.sender] >= amount, "Error en transferencia");
-        balanceOf[msg.sender] -= amount;
-        balanceOf[recipient] += amount;
-        emit Transfer(msg.sender, recipient, amount);
-        return true;
-    }
-
-    function approve(address spender, uint256 amount) external returns (bool) {
-        allowance[msg.sender][spender] += amount;
-        emit Approval(msg.sender, spender, amount);
-        return true;
-    }
-    //en transferFrom actuan tres elementos, el que quiere enviar(from), el que va a recibir(to) y el que va a ejecutar el envio(msg.sender)
-
-    function transferFrom(address from, address to, uint256 amount) external returns (bool) {
-        require(amount > 0 && balanceOf[from] >= amount && allowance[from][to] >= amount, "Error en transferencia");
-        require(from != address(0) && to != address(0), "La direccion no puede ser 0");
-        balanceOf[from] -= amount;
-        balanceOf[to] += amount;
-        allowance[from][msg.sender] -= amount; //msg.sender es el contrato que ejecuta el transfer en nombre de from
-        return true;
     }
 
     function mint(address to, uint256 amount) public {
         require(to != address(0), "Address can't be 0");
         require(amount > 0, "Amount is not enougt");
-        balanceOf[to] += amount;
-        totalSupply += amount;
+        _mint(to, amount);
         emit Mint(to, amount);
     }
 
     function burn(uint256 amount) public {
         require(amount > 0, "Amount is not enougt");
-        balanceOf[msg.sender] -= amount;
-        totalSupply -= amount;
-        balanceOf[address(0)] += amount;
+        _burn(msg.sender, amount);
         emit Burn(amount);
     }
 }

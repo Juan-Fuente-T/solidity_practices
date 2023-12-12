@@ -8,7 +8,6 @@ contract HolaTest is Test {
     SimpleWallet public simpleWallet;
     address alice;
 
-
     function setUp() public {
         simpleWallet = new SimpleWallet();
         alice = makeAddr("alice");
@@ -21,5 +20,5 @@ contract HolaTest is Test {
         simpleWallet.deposit();
         console.log(simpleWallet.getUserBallance(alice));
         //simpleWallet.withdraw(alice, 0.5 ether);
-     }
+    }
 }
