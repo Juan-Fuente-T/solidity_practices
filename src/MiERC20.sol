@@ -32,7 +32,7 @@ correctamente utilizando expectEmit(
 pragma solidity ^0.8.19;
 
 contract MiERC20 {
-    address creator;
+    address public creator;
     string public name;
     string public symbol;
     uint256 public decimals;
@@ -40,7 +40,8 @@ contract MiERC20 {
     event Genesis(address indexed creator);
     event Mint(address indexed to, uint256 amount);
     event Burn(uint256 amount);
-    event Transfer(address indexed sender, address indexed recipient, uint256 amount);
+    event Transfer(address indexed from, address indexed to, uint256 amount);
+    event TransferFrom(address indexed from, address indexed to, uint256 amount);
     event Approval(address indexed sender, address indexed approved, uint256 amount);
 
     uint256 public totalSupply;
@@ -52,16 +53,17 @@ contract MiERC20 {
         symbol = _symbol;
         decimals = _decimals;
         creator = msg.sender;
-        balanceOf[creator] += 1000000;
-        totalSupply += 1000000;
+        balanceOf[creator] += 1000000 * 1e18;
+        totalSupply += 1000000 * 1e18;
         emit Genesis(creator);
     }
 
-    function transfer(address recipient, uint256 amount) external returns (bool) {
+    function transfer(address to, uint256 amount) external returns (bool) {
+        require(to != address(0), "La direccion de destino no puede ser 0");
         require(amount > 0 && balanceOf[msg.sender] >= amount, "Error en transferencia");
         balanceOf[msg.sender] -= amount;
-        balanceOf[recipient] += amount;
-        emit Transfer(msg.sender, recipient, amount);
+        balanceOf[to] += amount;
+        emit Transfer(msg.sender, to, amount);
         return true;
     }
 
@@ -70,14 +72,19 @@ contract MiERC20 {
         emit Approval(msg.sender, spender, amount);
         return true;
     }
+
     //en transferFrom actuan tres elementos, el que quiere enviar(from), el que va a recibir(to) y el que va a ejecutar el envio(msg.sender)
 
     function transferFrom(address from, address to, uint256 amount) external returns (bool) {
-        require(amount > 0 && balanceOf[from] >= amount && allowance[from][to] >= amount, "Error en transferencia");
+        require(amount > 0 && balanceOf[from] >= amount, "Error en transferencia");
         require(from != address(0) && to != address(0), "La direccion no puede ser 0");
+        if (msg.sender != from) {
+            require(allowance[from][msg.sender] >= amount);
+            allowance[from][msg.sender] -= amount;
+        }
         balanceOf[from] -= amount;
         balanceOf[to] += amount;
-        allowance[from][msg.sender] -= amount; //msg.sender es el contrato que ejecuta el transfer en nombre de from
+        emit TransferFrom(from, to, amount);
         return true;
     }
 

@@ -1,10 +1,11 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity = 0.8.21;
+pragma solidity ^0.8.21;
 
-import "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
-import "@openzeppelin/contracts/token/ERC721/extensions/IERC721Metadata.sol";
-import "@openzeppelin/contracts/token/ERC721/extensions/IERC721Enumerable.sol";
-import "@openzeppelin/contracts/utils/Strings.sol";
+import "lib/openzeppelin-contracts/contracts/token/ERC721/IERC721Receiver.sol";
+import "lib/openzeppelin-contracts/contracts/token/ERC721/extensions/IERC721Metadata.sol";
+import "lib/openzeppelin-contracts/contracts/token/ERC721/extensions/IERC721Enumerable.sol";
+import "lib/openzeppelin-contracts/contracts/utils/Strings.sol";
+
 //import "../lib/openzeppelin-contracts/contracts/token/ERC721/extensions/IERC721Metadata.sol";
 /*
 Token ERC721-ERC1155: Crea un token ERC721 o ERC1155 (elige uno de los dos!). A
@@ -32,7 +33,8 @@ b.  El token deberá mintear un token con ID 1 al creador del contrato
     function tokenURI(uint256 _tokenId) external view returns (string);
 }*/
 
-contract MiERC721 { /*is IERC721Metadata, IERC721Enumerable*/
+contract MiERC721 {
+    /*is IERC721Metadata, IERC721Enumerable*/
     using Strings for uint256;
 
     string public _name;
@@ -58,9 +60,21 @@ contract MiERC721 { /*is IERC721Metadata, IERC721Enumerable*/
     event Deploy(address indexed creator);
     event Mint(address indexed to, uint256 _tokenId);
     event Burn(uint256 _tokenId);
-    event Transfer(address indexed _from, address indexed _to, uint256 indexed _tokenId);
-    event Approval(address indexed _owner, address indexed _approved, uint256 indexed _tokenId);
-    event ApprovalForAll(address indexed _owner, address indexed _operator, bool _approved);
+    event Transfer(
+        address indexed _from,
+        address indexed _to,
+        uint256 indexed _tokenId
+    );
+    event Approval(
+        address indexed _owner,
+        address indexed _approved,
+        uint256 indexed _tokenId
+    );
+    event ApprovalForAll(
+        address indexed _owner,
+        address indexed _operator,
+        bool _approved
+    );
 
     constructor(string memory name_, string memory symbol_) {
         _name = name_;
@@ -70,22 +84,32 @@ contract MiERC721 { /*is IERC721Metadata, IERC721Enumerable*/
     }
 
     function setTokenMetadata(uint256 tokenId) public {
-        _tokenMetadata[tokenId] = TokenMetadata(_defaultName, _defaultDescription, tokenURI(tokenId));
+        _tokenMetadata[tokenId] = TokenMetadata(
+            _defaultName,
+            _defaultDescription,
+            tokenURI(tokenId)
+        );
     }
 
     function tokenURI(uint256 tokenId) public view returns (string memory) {
         string memory baseURI = _baseURI();
-        return bytes(baseURI).length > 0
-            ? string(
-                abi.encodePacked(
-                    _tokenMetadata[tokenId].name, _tokenMetadata[tokenId].description, baseURI, tokenId.toString(), ".jpg"
+        return
+            bytes(baseURI).length > 0
+                ? string(
+                    abi.encodePacked(
+                        _tokenMetadata[tokenId].name,
+                        _tokenMetadata[tokenId].description,
+                        baseURI,
+                        tokenId.toString(),
+                        ".jpg"
+                    )
                 )
-            )
-            : "";
+                : "";
     }
 
     function _baseURI() internal pure returns (string memory) {
-        return "https://ipfs.io/ipfs/QmSz8cySmzuCc57j6LZRR3bVGGfiXaQY9XFnxKTkP2x981/FutureGarden_";
+        return
+            "https://ipfs.io/ipfs/QmSz8cySmzuCc57j6LZRR3bVGGfiXaQY9XFnxKTkP2x981/FutureGarden_";
     }
 
     function approve(address _approved, uint256 _tokenId) public {
@@ -106,11 +130,18 @@ contract MiERC721 { /*is IERC721Metadata, IERC721Enumerable*/
         return approved[_tokenId];
     }
 
-    function isApprovedForAll(address _owner, address _operator) external view returns (bool) {
+    function isApprovedForAll(
+        address _owner,
+        address _operator
+    ) external view returns (bool) {
         return approvalForAll[_owner][_operator];
     }
 
-    function transferFrom(address _from, address _to, uint256 _tokenId) public payable {
+    function transferFrom(
+        address _from,
+        address _to,
+        uint256 _tokenId
+    ) public payable {
         require(_to != address(0), "No puede ser la direccion 0");
         require(owner[_tokenId] == _from, "No eres el poseedor del NFT");
         if (msg.sender == _from) {
@@ -119,7 +150,9 @@ contract MiERC721 { /*is IERC721Metadata, IERC721Enumerable*/
             //Esto está bien??
             //require(owner[_tokenId] == _from, "No eres el poseedor del NFT");
             require(
-                _tokenApprovals[_from][msg.sender] == _tokenId || approvalForAll[_from][msg.sender], "No tienes permiso"
+                _tokenApprovals[_from][msg.sender] == _tokenId ||
+                    approvalForAll[_from][msg.sender],
+                "No tienes permiso"
             );
             transfer(_from, _to, _tokenId);
         }
@@ -133,28 +166,53 @@ contract MiERC721 { /*is IERC721Metadata, IERC721Enumerable*/
         emit Transfer(_from, _to, _tokenId);
     }
 
-    function safeTransferFrom(address _from, address _to, uint256 _tokenId) external payable {
+    function safeTransferFrom(
+        address _from,
+        address _to,
+        uint256 _tokenId
+    ) external payable {
         //safeTransferFrom(_from, _to, _tokenId, "");
         //if(_to.onERC721Received()){
         //transferFrom(_from, _to, _tokenId);}
 
         // Se llama a onERC721Received en el contrato de destino
-        bytes4 retval = IERC721Receiver(_to).onERC721Received(msg.sender, _from, _tokenId, "");
+        bytes4 retval = IERC721Receiver(_to).onERC721Received(
+            msg.sender,
+            _from,
+            _tokenId,
+            ""
+        );
         // Se verifica que onERC721Received devolvió el valor correcto
         require(
-            retval == bytes4(keccak256("onERC721Received(address,address,uint256,bytes)")),
+            retval ==
+                bytes4(
+                    keccak256("onERC721Received(address,address,uint256,bytes)")
+                ),
             "No es posible enviar el NFT"
         );
         // Si todo está bien, se realiza la transferencia
         transferFrom(_from, _to, _tokenId);
     }
 
-    function safeTransferFrom(address _from, address _to, uint256 _tokenId, bytes calldata _data) external payable {
+    function safeTransferFrom(
+        address _from,
+        address _to,
+        uint256 _tokenId,
+        bytes calldata _data
+    ) external payable {
         // Se llama a onERC721Received en el contrato de destino
-        bytes4 retval = IERC721Receiver(_to).onERC721Received(msg.sender, _from, _tokenId, _data);
+        bytes4 retval = IERC721Receiver(_to).onERC721Received(
+            msg.sender,
+            _from,
+            _tokenId,
+            _data
+        );
         // Se verifica que onERC721Received devolvió el valor correcto
         require(
-            retval == bytes4(keccak256("onERC721Received(address,address,uint256,bytes)")),
+            retval ==
+                bytes4(
+                    keccak256("onERC721Received(address,address,uint256,bytes)")
+                ),
             "No es posible enviar el NFT"
         );
         // Si todo está bien, se realiza la transferencia
@@ -185,7 +243,12 @@ contract MiERC721 { /*is IERC721Metadata, IERC721Enumerable*/
         emit Burn(_tokenId);
     }
 
-    function onERC721Received(address, address, uint256, bytes calldata) external pure returns (bytes4) {
+    function onERC721Received(
+        address,
+        address,
+        uint256,
+        bytes calldata
+    ) external pure returns (bytes4) {
         return IERC721Receiver.onERC721Received.selector;
     }
 

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity = 0.8.21;
+pragma solidity =0.8.21;
 
 import {Test, console2} from "lib/forge-std/src/Test.sol";
 import {MiERC721} from "../src/MiERC721.sol";
@@ -33,7 +33,7 @@ token con ID 1 al creador del contrato!)
     function isApprovedForAll(address _owner, address _operator) external view returns (bool);
 */
 
-contract MiERC20Test is Test {
+contract MiERC721Test is Test {
     MiERC721 public miERC721;
     address alice;
     address bob;
@@ -42,9 +42,21 @@ contract MiERC20Test is Test {
     event Deploy(address indexed creator);
     event Mint(address indexed to, uint256 _tokenId);
     event Burn(uint256 _tokenId);
-    event Transfer(address indexed _from, address indexed _to, uint256 indexed _tokenId);
-    event Approval(address indexed _owner, address indexed _approved, uint256 indexed _tokenId);
-    event ApprovalForAll(address indexed _owner, address indexed _operator, bool _approved);
+    event Transfer(
+        address indexed _from,
+        address indexed _to,
+        uint256 indexed _tokenId
+    );
+    event Approval(
+        address indexed _owner,
+        address indexed _approved,
+        uint256 indexed _tokenId
+    );
+    event ApprovalForAll(
+        address indexed _owner,
+        address indexed _operator,
+        bool _approved
+    );
 
     function setUp() public {
         miERC721 = new MiERC721("MiERC721", "ME721");
@@ -54,13 +66,11 @@ contract MiERC20Test is Test {
         vm.startPrank(alice);
     }
 
-    function testTokenURI() public view {
+    function testMiERC721TokenURI() public view {
         console2.log("URI", miERC721.tokenURI(1));
     }
 
-    function testDeploy() public {
-        vm.expectEmit();
-        emit Deploy(alice);
+    function testMiERC721Deploy() public {
         assertEq(miERC721.balanceOf(address(miERC721)), 1);
         assertEq(miERC721.ownerOf(1), address(miERC721));
         assertEq(miERC721.getApproved(1), address(0x0));
@@ -68,9 +78,11 @@ contract MiERC20Test is Test {
         assertEq(miERC721._name(), string("MiERC721"));
         assertEq(miERC721._symbol(), string("ME721"));
         console2.log("URI", miERC721.tokenURI(1));
+        vm.expectEmit();
+        emit Deploy(address(this));
     }
 
-    function testMint() public {
+    function testMiERC721Mint() public {
         vm.expectEmit(true, false, false, false);
         emit Mint(alice, 2);
         miERC721.mint(alice, 2);
@@ -84,7 +96,7 @@ contract MiERC20Test is Test {
         miERC721.mint(address(0), 4);
     }
 
-    function testBurn() public {
+    function testMiERC721Burn() public {
         miERC721.mint(alice, 2);
         miERC721.mint(msg.sender, 3);
         console2.log("Balance alice:", miERC721.balanceOf(alice));
@@ -104,7 +116,7 @@ contract MiERC20Test is Test {
         console2.log("Owner of NFT 2", miERC721.ownerOf(2));
     }
 
-    function testTransferFrom() public {
+    function testMiERC721TransferFrom() public {
         miERC721.mint(alice, 2);
         assertEq(miERC721.ownerOf(2), alice);
         vm.expectRevert("No puede ser la direccion 0");
@@ -130,7 +142,7 @@ contract MiERC20Test is Test {
         //miERC721.safeTransferFrom(msg.sender, bob, 3);
     }
 
-    function testApproval() public {
+    function testMiERC721Approval() public {
         miERC721.mint(alice, 2);
         miERC721.mint(msg.sender, 3);
         vm.expectEmit();
@@ -154,7 +166,7 @@ contract MiERC20Test is Test {
         assertEq(miERC721.ownerOf(3), alice);
     }
 
-    function testSafeTransferFrom() public {
+    function testMiERC721SafeTransferFrom() public {
         miERC721.mint(alice, 4);
         vm.startPrank(carol);
         miERC721.safeTransferFrom(carol, bob, 4, "");
