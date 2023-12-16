@@ -2,7 +2,7 @@
 pragma solidity ^0.8.21;
 
 contract RecibirEtherReceive {
-    mapping(address => uint256) balances;
+    mapping(address => uint256) public balances;
 
     event Deposited(address indexed depositor, uint256 indexed amount);
     event Withdraw(address indexed withdrawer, uint256 indexed amount);
@@ -10,13 +10,14 @@ contract RecibirEtherReceive {
     error InsuficientBalance();
     error FailTransaction();
 
+    //SE DEBERIA evaluar que no sea la address(0x0)??
     function withdrawWithCall(uint256 amount) external payable {
-        if (balances[msg.sender] > amount) {
+        if (amount == 0 || balances[msg.sender] < amount) {
             revert InsuficientBalance();
         }
 
         balances[msg.sender] -= amount;
-        (bool sent, ) = payable(msg.sender).call{value: amount}("");
+        (bool sent,) = payable(msg.sender).call{value: amount}("");
         if (!sent) {
             revert FailTransaction();
         }
@@ -24,25 +25,29 @@ contract RecibirEtherReceive {
     }
 
     function withdrawWithTransfer(uint256 amount) external payable {
-        if (balances[msg.sender] < amount) {
+        if (amount == 0 || balances[msg.sender] < amount) {
             revert InsuficientBalance();
         }
+
         balances[msg.sender] -= amount;
         payable(msg.sender).transfer(amount);
         emit Withdraw(msg.sender, amount);
     }
 
     function withdrawWithSend(uint256 amount) external payable {
-        if (balances[msg.sender] < amount) {
+        if (amount == 0 || balances[msg.sender] < amount) {
             revert InsuficientBalance();
         }
+
         balances[msg.sender] -= amount;
         bool sent = payable(msg.sender).send(amount);
         if (!sent) {
             revert FailTransaction();
         }
+        emit Withdraw(msg.sender, amount);
     }
 
+    //IMPORTANTE ¿Que esta pasando con transfer? que me esta dando error por gas
     receive() external payable {
         balances[msg.sender] += msg.value;
         emit Deposited(msg.sender, msg.value);

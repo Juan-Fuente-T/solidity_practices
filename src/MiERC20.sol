@@ -41,8 +41,16 @@ contract MiERC20 {
     event Mint(address indexed to, uint256 amount);
     event Burn(uint256 amount);
     event Transfer(address indexed from, address indexed to, uint256 amount);
-    event TransferFrom(address indexed from, address indexed to, uint256 amount);
-    event Approval(address indexed sender, address indexed approved, uint256 amount);
+    event TransferFrom(
+        address indexed from,
+        address indexed to,
+        uint256 amount
+    );
+    event Approval(
+        address indexed sender,
+        address indexed approved,
+        uint256 amount
+    );
 
     uint256 public totalSupply;
     mapping(address => uint256) public balanceOf;
@@ -53,14 +61,17 @@ contract MiERC20 {
         symbol = _symbol;
         decimals = _decimals;
         creator = msg.sender;
-        balanceOf[creator] += 1000000 * 1e18;
-        totalSupply += 1000000 * 1e18;
+        balanceOf[creator] += 1000000 * 10 ** _decimals;
+        totalSupply += 1000000 * 10 ** _decimals;
         emit Genesis(creator);
     }
 
     function transfer(address to, uint256 amount) external returns (bool) {
         require(to != address(0), "La direccion de destino no puede ser 0");
-        require(amount > 0 && balanceOf[msg.sender] >= amount, "Error en transferencia");
+        require(
+            amount > 0 && balanceOf[msg.sender] >= amount,
+            "Error en transferencia"
+        );
         balanceOf[msg.sender] -= amount;
         balanceOf[to] += amount;
         emit Transfer(msg.sender, to, amount);
@@ -75,9 +86,19 @@ contract MiERC20 {
 
     //en transferFrom actuan tres elementos, el que quiere enviar(from), el que va a recibir(to) y el que va a ejecutar el envio(msg.sender)
 
-    function transferFrom(address from, address to, uint256 amount) external returns (bool) {
-        require(amount > 0 && balanceOf[from] >= amount, "Error en transferencia");
-        require(from != address(0) && to != address(0), "La direccion no puede ser 0");
+    function transferFrom(
+        address from,
+        address to,
+        uint256 amount
+    ) external returns (bool) {
+        require(
+            amount > 0 && balanceOf[from] >= amount,
+            "Error en transferencia"
+        );
+        require(
+            from != address(0) && to != address(0),
+            "La direccion no puede ser 0"
+        );
         if (msg.sender != from) {
             require(allowance[from][msg.sender] >= amount);
             allowance[from][msg.sender] -= amount;
@@ -90,14 +111,14 @@ contract MiERC20 {
 
     function mint(address to, uint256 amount) public {
         require(to != address(0), "Address can't be 0");
-        require(amount > 0, "Amount is not enougt");
+        require(amount > 0, "Amount is not enough");
         balanceOf[to] += amount;
         totalSupply += amount;
         emit Mint(to, amount);
     }
 
     function burn(uint256 amount) public {
-        require(amount > 0, "Amount is not enougt");
+        require(amount > 0, "Amount is not enough");
         balanceOf[msg.sender] -= amount;
         totalSupply -= amount;
         balanceOf[address(0)] += amount;

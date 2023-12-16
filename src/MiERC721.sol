@@ -5,8 +5,8 @@ import "lib/openzeppelin-contracts/contracts/token/ERC721/IERC721Receiver.sol";
 import "lib/openzeppelin-contracts/contracts/token/ERC721/extensions/IERC721Metadata.sol";
 import "lib/openzeppelin-contracts/contracts/token/ERC721/extensions/IERC721Enumerable.sol";
 import "lib/openzeppelin-contracts/contracts/utils/Strings.sol";
+import {console} from "../lib/forge-std/src/console.sol";
 
-//import "../lib/openzeppelin-contracts/contracts/token/ERC721/extensions/IERC721Metadata.sol";
 /*
 Token ERC721-ERC1155: Crea un token ERC721 o ERC1155 (elige uno de los dos!). A
 diferencia del ejercicio sobre el ERC20, en este ejercicio no utilizaremos plantillas, ya que
@@ -37,6 +37,7 @@ contract MiERC721 {
     /*is IERC721Metadata, IERC721Enumerable*/
     using Strings for uint256;
 
+    address public creator;
     string public _name;
     string public _symbol;
     string private _defaultName = "FutureGarden";
@@ -77,10 +78,11 @@ contract MiERC721 {
     );
 
     constructor(string memory name_, string memory symbol_) {
+        creator = msg.sender;
         _name = name_;
         _symbol = symbol_;
         mint(address(this), 1);
-        emit Deploy(msg.sender);
+        emit Deploy(creator);
     }
 
     function setTokenMetadata(uint256 tokenId) public {
@@ -120,7 +122,7 @@ contract MiERC721 {
     }
 
     function setApprovalForAll(address _operator, bool _approved) external {
-        require(msg.sender != address(0));
+        //require(msg.sender != address(0)); NO ES NECESARTIO la address(0) no puede ejecutar transacciones
         //address _owner = msg.sender;
         approvalForAll[msg.sender][_operator] = _approved;
         emit ApprovalForAll(msg.sender, _operator, _approved);
@@ -170,18 +172,20 @@ contract MiERC721 {
         address _from,
         address _to,
         uint256 _tokenId
-    ) external payable {
+    ) public payable {
+        console.log("Inicio funcion safeTransferfrom");
         //safeTransferFrom(_from, _to, _tokenId, "");
         //if(_to.onERC721Received()){
         //transferFrom(_from, _to, _tokenId);}
 
         // Se llama a onERC721Received en el contrato de destino
         bytes4 retval = IERC721Receiver(_to).onERC721Received(
-            msg.sender,
             _from,
+            _to,
             _tokenId,
             ""
         );
+        console.logBytes4(retval);
         // Se verifica que onERC721Received devolvió el valor correcto
         require(
             retval ==
@@ -190,6 +194,7 @@ contract MiERC721 {
                 ),
             "No es posible enviar el NFT"
         );
+        console.log(_from, _to, _tokenId);
         // Si todo está bien, se realiza la transferencia
         transferFrom(_from, _to, _tokenId);
     }
@@ -202,8 +207,8 @@ contract MiERC721 {
     ) external payable {
         // Se llama a onERC721Received en el contrato de destino
         bytes4 retval = IERC721Receiver(_to).onERC721Received(
-            msg.sender,
             _from,
+            _to,
             _tokenId,
             _data
         );
@@ -216,7 +221,7 @@ contract MiERC721 {
             "No es posible enviar el NFT"
         );
         // Si todo está bien, se realiza la transferencia
-        transferFrom(_from, _to, _tokenId);
+        safeTransferFrom(_from, _to, _tokenId);
     }
 
     function balanceOf(address _owner) external view returns (uint256) {

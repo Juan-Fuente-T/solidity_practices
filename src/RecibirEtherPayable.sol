@@ -15,9 +15,9 @@ contract RecibirEtherPayable {
         if (msg.value > 10 ether) {
             revert MaxAmountReached();
         }
-        //Agregamos el valor a nuestro balance total
+        //NO ES NECESARIO agregar el valor a nuestro balance total, se hace de modo automático internamente
         //address(this).balance += msg.value;
-        if (address(this).balance > 50) {
+        if (address(this).balance > 50 ether) {
             revert MaxBalanceReached();
         }
         emit Deposited(msg.sender, msg.value);

@@ -71,6 +71,12 @@ contract MiERC721Test is Test {
     }
 
     function testMiERC721Deploy() public {
+        console2.log(address(this));
+        console2.log(msg.sender);
+        console2.log(alice);
+        vm.expectEmit();
+        emit Deploy(alice);
+        miERC721 = new MiERC721("MiERC721", "ME721");
         assertEq(miERC721.balanceOf(address(miERC721)), 1);
         assertEq(miERC721.ownerOf(1), address(miERC721));
         assertEq(miERC721.getApproved(1), address(0x0));
@@ -78,8 +84,6 @@ contract MiERC721Test is Test {
         assertEq(miERC721._name(), string("MiERC721"));
         assertEq(miERC721._symbol(), string("ME721"));
         console2.log("URI", miERC721.tokenURI(1));
-        vm.expectEmit();
-        emit Deploy(address(this));
     }
 
     function testMiERC721Mint() public {
@@ -148,6 +152,7 @@ contract MiERC721Test is Test {
         vm.expectEmit();
         emit Approval(alice, carol, 2);
         miERC721.approve(carol, 2);
+        assertEq(carol, miERC721.getApproved(2));
         vm.startPrank(bob);
         vm.expectRevert("No tienes permiso");
         miERC721.transferFrom(alice, bob, 2);
@@ -159,6 +164,7 @@ contract MiERC721Test is Test {
         vm.expectEmit();
         emit ApprovalForAll(carol, bob, true);
         miERC721.setApprovalForAll(bob, true);
+        assertEq(true, miERC721.isApprovedForAll(carol, bob));
         console2.log("ApprovedForAll", miERC721.isApprovedForAll(carol, bob));
         assertEq(miERC721.ownerOf(3), carol);
         vm.startPrank(bob);
@@ -167,16 +173,17 @@ contract MiERC721Test is Test {
     }
 
     function testMiERC721SafeTransferFrom() public {
-        miERC721.mint(alice, 4);
+        miERC721.mint(alice, 2);
+        miERC721.approve(carol, 2);
         vm.startPrank(carol);
-        miERC721.safeTransferFrom(carol, bob, 4, "");
-        assertEq(miERC721.ownerOf(4), bob);
+        miERC721.safeTransferFrom(alice, bob, 2, "");
+        assertEq(miERC721.ownerOf(2), bob);
         vm.startPrank(bob);
-        miERC721.safeTransferFrom(bob, alice, 4, "");
-        assertEq(miERC721.ownerOf(4), alice);
+        miERC721.safeTransferFrom(bob, alice, 2, "");
+        assertEq(miERC721.ownerOf(2), alice);
         vm.startPrank(alice);
-        miERC721.safeTransferFrom(alice, bob, 4, "");
-        assertEq(miERC721.ownerOf(4), bob);
+        miERC721.safeTransferFrom(alice, bob, 2, "Para mi prima");
+        assertEq(miERC721.ownerOf(2), bob);
 
         /*
         Orden para creacion contratos:

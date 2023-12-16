@@ -46,7 +46,7 @@ contract MiERC20PlantillaTest is Test {
         miERC20Plantilla.mint(alice, 20 * 1e18);
         vm.expectRevert("Address can't be 0");
         miERC20Plantilla.mint(address(0), 20 * 1e18);
-        vm.expectRevert("Amount is not enougt");
+        vm.expectRevert("Amount is not enough");
         miERC20Plantilla.mint(alice, 0 * 1e18);
         console2.log("Balance alice", miERC20Plantilla.balanceOf(alice));
         assertEq(miERC20Plantilla.balanceOf(alice), 20 * 1e18);
@@ -69,9 +69,12 @@ contract MiERC20PlantillaTest is Test {
         //vm.expectEmit(true, true);
         //emit miERC20Plantilla.Burn(alice, 10);
         miERC20Plantilla.burn(10 * 1e18);
-        console2.log("Balance alice despues", miERC20Plantilla.balanceOf(alice));
+        console2.log(
+            "Balance alice despues",
+            miERC20Plantilla.balanceOf(alice)
+        );
         assertEq(miERC20Plantilla.balanceOf(alice), 10 * 1e18);
-        vm.expectRevert("Amount is not enougt");
+        vm.expectRevert("Amount is not enough");
         miERC20Plantilla.burn(0);
     }
 

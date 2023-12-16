@@ -50,13 +50,13 @@ contract MiERC20Plantilla is ERC20("ERCPlantilla", "ERCP", 18) {
 
     function mint(address to, uint256 amount) public {
         require(to != address(0), "Address can't be 0");
-        require(amount > 0, "Amount is not enougt");
+        require(amount > 0, "Amount is not enough");
         _mint(to, amount);
         emit Mint(to, amount);
     }
 
     function burn(uint256 amount) public {
-        require(amount > 0, "Amount is not enougt");
+        require(amount > 0, "Amount is not enough");
         _burn(msg.sender, amount);
         emit Burn(amount);
     }

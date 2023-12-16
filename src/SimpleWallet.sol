@@ -40,9 +40,10 @@ contract SimpleWallet {
     */
     function deposit() public payable onlyOwner {
         //es necesario que sea payable para recibir ether real, no wrapped
-        require(msg.value > 0, "Not enought ether");
+        require(msg.value > 0, "Not enough ether");
         userBalance[msg.sender] += msg.value;
     }
+
     /*
     function deposit(address payable _to) public payable{
         //Es la recomendada para enviar ether

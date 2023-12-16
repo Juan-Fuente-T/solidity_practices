@@ -32,8 +32,16 @@ contract MiERC20Test is Test {
     event Mint(address indexed to, uint256 amount);
     event Burn(uint256 amount);
     event Transfer(address indexed from, address indexed to, uint256 amount);
-    event TransferFrom(address indexed from, address indexed to, uint256 amount);
-    event Approval(address indexed sender, address indexed approved, uint256 amount);
+    event TransferFrom(
+        address indexed from,
+        address indexed to,
+        uint256 amount
+    );
+    event Approval(
+        address indexed sender,
+        address indexed approved,
+        uint256 amount
+    );
 
     function setUp() public {
         miERC20 = new MiERC20("MiERC20", "MERC20", 18);
@@ -43,9 +51,10 @@ contract MiERC20Test is Test {
     }
 
     function testMiERC20Genesis() public {
-        assertEq(miERC20.creator(), 0x7FA9385bE102ac3EAc297483Dd6233D62b3e1496);
         vm.expectEmit();
         emit Genesis(0x7FA9385bE102ac3EAc297483Dd6233D62b3e1496);
+        miERC20 = new MiERC20("MiERC20", "MERC20", 18);
+        assertEq(miERC20.creator(), 0x7FA9385bE102ac3EAc297483Dd6233D62b3e1496);
         assertEq(miERC20.name(), "MiERC20");
         assertEq(miERC20.symbol(), "MERC20");
         assertEq(miERC20.decimals(), 18);
@@ -133,7 +142,7 @@ contract MiERC20Test is Test {
         assertEq(miERC20.totalSupply(), 1000020 * 1e18);
         vm.expectRevert("Address can't be 0");
         miERC20.mint(address(0), 20);
-        vm.expectRevert("Amount is not enougt");
+        vm.expectRevert("Amount is not enough");
         miERC20.mint(alice, 0);
         console2.log("Balance alice", miERC20.balanceOf(alice));
         assertEq(miERC20.balanceOf(alice), 20 * 1e18);
@@ -162,7 +171,7 @@ contract MiERC20Test is Test {
         miERC20.burn(10);
         console2.log("Balance alice despues", miERC20.balanceOf(alice));
         assertEq(miERC20.balanceOf(alice), 10);
-        vm.expectRevert("Amount is not enougt");
+        vm.expectRevert("Amount is not enough");
         miERC20.burn(0);
     }
 
