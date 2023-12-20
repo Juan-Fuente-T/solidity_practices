@@ -3,21 +3,31 @@ pragma solidity ^0.8.21;
 
 interface IDAI {
     function name() external view returns (string memory);
+
+    function totalSupply() external view returns (uint256);
 }
 
 contract InteractuaDAI {
-    IDAI public DAI = IDAI(0x6B175474E89094C44Da98b954EedeAC495271d0F);
+    IDAI public dai = IDAI(address(0x6B175474E89094C44Da98b954EedeAC495271d0F)); //la referencia(hash) todavia no es una address hasta que se indique con el cast
 
-    /*constructor(address _DAI) {
-        DAI = IDAI(_DAI);
+    //address public _dai = 0x6B175474E89094C44Da98b954EedeAC495271d0F;
+    //IDAI public dai = IDAI(_dai);
+    //IDAI public dai;
+
+    /*constructor() {
+        dai = IDAI(_dai);
     }*/
 
+    //constructor() {}
+
     function consultaNombreDAI() external view returns (string memory) {
-        string memory loquesea = DAI.name();
-        return loquesea;
+        return dai.name();
+    }
+
+    function consultaTotalSupply() external view returns (uint256) {
+        return dai.totalSupply();
     }
 }
-
 /*El objetivo de estos ejercicio es interactuar con contratos externos. En el primer ejercicio,
 deberás crear un fork de la red principal de Ethereum (mainnet). En el segundo, el fork
 deberá ser de la red de test Sepolia.

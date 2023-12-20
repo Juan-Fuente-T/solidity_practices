@@ -100,143 +100,234 @@ contract MiERC1155 {
 
     mapping(uint256 => TokenMetadata) private _tokenMetadata;
 
-    mapping(address => uint256) private balance;
-    mapping(uint256 => address) private owner;
-    mapping(address => mapping(address => uint256)) private _tokenApprovals;
-    mapping(address => mapping(address => bool)) private approvalForAll;
+    mapping(address => mapping(uint256 => uint256)) public balance;
+    //mapping(uint256 => address) private owner;
+    //mapping(address => mapping(address => uint256)) private operatorApprovals;
+    mapping(address => mapping(address => bool)) private operatorApprovals;
     mapping(uint256 => address) private approved;
+    mapping(uint256 => uint256) public totalSupply;
 
-    event Deploy(address indexed creator);
-    event Mint(address indexed to, uint256 _tokenId);
-    event Burn(uint256 _tokenId);
-    event Transfer(address indexed _from, address indexed _to, uint256 indexed _tokenId);
-    event Approval(address indexed _owner, address indexed _approved, uint256 indexed _tokenId);
-    event ApprovalForAll(address indexed _owner, address indexed _operator, bool _approved);
+    event TransferSingle(
+        address indexed _operator,
+        address indexed _from,
+        address indexed _to,
+        uint256 _id,
+        uint256 _value
+    );
+    event TransferBatch(
+        address indexed _operator,
+        address indexed _from,
+        address indexed _to,
+        uint256[] _ids,
+        uint256[] _values
+    );
+    event ApprovalForAll(
+        address indexed _owner,
+        address indexed _operator,
+        bool _approved
+    );
+    event URI(string _value, uint256 indexed _id);
+
+    //event Deploy(address indexed creator);
+    event Mint(address indexed to, uint256 _tokenId, uint256 _value);
+    event Burn(uint256 _tokenId, uint256 _value);
+
+    //event Transfer(address indexed _from, address indexed _to, uint256 indexed _tokenId);
+    //event Approval(address indexed _owner, address indexed _approved, uint256 indexed _tokenId);
 
     constructor(string memory name_, string memory symbol_) {
         _name = name_;
         _symbol = symbol_;
-        mint(address(this), 1);
-        emit Deploy(msg.sender);
+        //mint(address(this), 1);
     }
 
-    function setTokenMetadata(uint256 tokenId) public {
-        _tokenMetadata[tokenId] = TokenMetadata(_defaultName, _defaultDescription, tokenURI(tokenId));
+    function safeTransferFrom(
+        address _from,
+        address _to,
+        uint256 _id,
+        uint256 _value,
+        bytes calldata _data
+    ) external {
+        require(_from == msg.sender, "No eres el poseedor");
+        require(operatorApprovals[_from][msg.sender], "No tienes permiso");
+        require(
+            _to != address(0x0) || _from != address(0x0),
+            "Las direcciones no pueden ser la address 0"
+        );
+        //require(_id.length == _value.length, "Revisa los id y los precios");
+        require(balance[_from][_id] > _value, "Saldo insuficiente");
+        require(
+            checkERC1155TokenReceiver(_from, _to, _id, _value, _data),
+            "Receptor no compatible con ERC1155"
+        );
+
+        balance[_from][_id] -= _value;
+        balance[_to][_id] += _value;
+        totalSupply[_id] -= _value;
+
+        emit TransferSingle(msg.sender, _from, _to, _id, _value);
+    }
+
+    /*
+        After the above conditions for the transfer(s) in the batch are met, this function MUST check if `_to` is a smart contract (e.g. code size > 0). If so, it MUST call the relevant `ERC1155TokenReceiver` hook(s) on `_to` and act appropriately (see "Safe Transfer Rules" section of the standard).                      
+
+        @param _data    Additional data with no specified format, MUST be sent unaltered in call to the `ERC1155TokenReceiver` hook(s) on `_to`
+---------------------------------------------------
+        MUST emit `TransferSingle` or `TransferBatch` event(s) such that all the balance changes are reflected (see "Safe Transfer Rules" section of the standard).
+      
+        After the above conditions for the transfer(s) in the batch are met, this function MUST check if `_to` is a smart contract (e.g. code size > 0). If so, it MUST call the relevant `ERC1155TokenReceiver` hook(s) on `_to` and act appropriately (see "Safe Transfer Rules" section of the standard).                      
+       
+        @param _data    Additional data with no specified format, MUST be sent unaltered in call to the `ERC1155TokenReceiver` hook(s) on `_to`
+*/
+    function safeBatchTransferFrom(
+        address _from,
+        address _to,
+        uint256[] calldata _ids,
+        uint256[] calldata _values,
+        bytes calldata _data
+    ) external {
+        require(
+            _from == msg.sender || operatorApprovals[_from][msg.sender] == true,
+            "No tienes permiso"
+        );
+        require(
+            _ids.length == _values.length,
+            "Revisa los datos de que y cuanto quieres enviar"
+        );
+        require(
+            _from != address(0x0) || _to != address(0x0),
+            "No puede ser la direccion 0"
+        );
+        /*require(
+            checkERC1155TokenReceiverBatch(_from, _to, _ids, _values, _data),
+            "Receptor no compatible con ERC1155"
+        );*/
+
+        for (uint i; i > _ids.length; i++) {
+            uint256 id = _ids[i];
+
+            require(balance[_from][id] >= _values[i], "Saldo insuficiente");
+            balance[_from][id] -= _values[i];
+            balance[_to][id] += _values[i];
+            totalSupply[id] -= _values[i];
+        }
+        emit TransferBatch(msg.sender, _from, _to, _ids, _values);
+    }
+
+    /*function setTokenMetadata(uint256 tokenId) public {
+        _tokenMetadata[tokenId] = TokenMetadata(
+            _defaultName,
+            _defaultDescription,
+            tokenURI(tokenId)
+        );
     }
 
     function tokenURI(uint256 tokenId) public view returns (string memory) {
         string memory baseURI = _baseURI();
-        return bytes(baseURI).length > 0
-            ? string(
-                abi.encodePacked(
-                    _tokenMetadata[tokenId].name, _tokenMetadata[tokenId].description, baseURI, tokenId.toString(), ".jpg"
+        return
+            bytes(baseURI).length > 0
+                ? string(
+                    abi.encodePacked(
+                        _tokenMetadata[tokenId].name,
+                        _tokenMetadata[tokenId].description,
+                        baseURI,
+                        tokenId.toString(),
+                        ".jpg"
+                    )
                 )
-            )
-            : "";
+                : "";
+    }*/
+    function tokenURI(uint256 _id) public view returns (string memory) {
+        // Devuelve la URL del metadato del token con el ID dado
+        return
+            string(
+                abi.encodePacked("https://example.com/token/", _id.toString())
+            );
     }
 
-    function _baseURI() internal pure returns (string memory) {
-        return "https://ipfs.io/ipfs/QmSz8cySmzuCc57j6LZRR3bVGGfiXaQY9XFnxKTkP2x981/FutureGarden_";
+    function balanceOf(
+        address _owner,
+        uint256 _id
+    ) external view returns (uint256) {
+        return balance[_owner][_id];
     }
 
-    function approve(address _approved, uint256 _tokenId) public {
-        require(owner[_tokenId] == msg.sender, "No eres el poseedor del NFT");
-        _tokenApprovals[msg.sender][_approved] = _tokenId;
-        approved[_tokenId] = _approved;
-        emit Approval(msg.sender, _approved, _tokenId);
+    function balanceOfBatch(
+        address[] calldata _owners,
+        uint256[] calldata _ids
+    ) external view returns (uint256[] memory) {
+        require(_owners.length == _ids.length, "Revisa los datos introducidos");
+
+        uint256[] memory batchBalances = new uint256[](_owners.length);
+
+        for (uint256 i; i < _owners.length; i++) {
+            batchBalances[i] = balance[_owners[i]][_ids[i]];
+        }
+        return batchBalances;
     }
 
     function setApprovalForAll(address _operator, bool _approved) external {
-        require(msg.sender != address(0));
-        //address _owner = msg.sender;
-        approvalForAll[msg.sender][_operator] = _approved;
+        require(_operator != address(0x0));
+        operatorApprovals[msg.sender][_operator] = _approved;
         emit ApprovalForAll(msg.sender, _operator, _approved);
     }
 
-    function getApproved(uint256 _tokenId) public view returns (address) {
-        return approved[_tokenId];
+    function isApprovedForAll(
+        address _owner,
+        address _operator
+    ) external view returns (bool) {
+        return operatorApprovals[_owner][_operator];
     }
 
-    function isApprovedForAll(address _owner, address _operator) external view returns (bool) {
-        return approvalForAll[_owner][_operator];
+    function _baseURI() internal pure returns (string memory) {
+        return
+            "https://ipfs.io/ipfs/QmSz8cySmzuCc57j6LZRR3bVGGfiXaQY9XFnxKTkP2x981/FutureGarden_";
     }
 
-    function transferFrom(address _from, address _to, uint256 _tokenId) public payable {
-        require(_to != address(0), "No puede ser la direccion 0");
-        require(owner[_tokenId] == _from, "No eres el poseedor del NFT");
-        if (msg.sender == _from) {
-            transfer(_from, _to, _tokenId);
-        } else {
-            //Esto está bien??
-            //require(owner[_tokenId] == _from, "No eres el poseedor del NFT");
-            require(
-                _tokenApprovals[_from][msg.sender] == _tokenId || approvalForAll[_from][msg.sender], "No tienes permiso"
-            );
-            transfer(_from, _to, _tokenId);
-        }
+    function checkERC1155TokenReceiver(
+        address _from,
+        address _to,
+        uint256 _id,
+        uint256 _value,
+        bytes calldata _data
+    ) internal returns (bool) {
+        // Implementa la lógica para comprobar si el receptor del token es compatible con ERC1155
+        // Por ejemplo, puedes verificar si el receptor implementa la interfaz ERC1155TokenReceiver
+        // y realizar otras comprobaciones necesarias
+        return true;
     }
 
-    function transfer(address _from, address _to, uint256 _tokenId) internal {
-        balance[_from] -= 1;
-        owner[_tokenId] = _to;
-        balance[_to] += 1;
-        delete _tokenApprovals[_from][msg.sender]; //¿Esto es asi????
-        emit Transfer(_from, _to, _tokenId);
-    }
+    function checkERC1155TokenReceiverBatch(
+        address _from,
+        address _to,
+        uint256[] calldata _ids,
+        uint256[] calldata _values,
+        bytes calldata _data
+    ) internal {}
 
-    function safeTransferFrom(address _from, address _to, uint256 _tokenId) external payable {
-        //safeTransferFrom(_from, _to, _tokenId, "");
-        //if(_to.onERC721Received()){
-        //transferFrom(_from, _to, _tokenId);}
-
-        // Se llama a onERC721Received en el contrato de destino
-        bytes4 retval = IERC721Receiver(_to).onERC721Received(msg.sender, _from, _tokenId, "");
-        // Se verifica que onERC721Received devolvió el valor correcto
-        require(
-            retval == bytes4(keccak256("onERC721Received(address,address,uint256,bytes)")),
-            "No es posible enviar el NFT"
-        );
-        // Si todo está bien, se realiza la transferencia
-        transferFrom(_from, _to, _tokenId);
-    }
-
-    function safeTransferFrom(address _from, address _to, uint256 _tokenId, bytes calldata _data) external payable {
-        // Se llama a onERC721Received en el contrato de destino
-        bytes4 retval = IERC721Receiver(_to).onERC721Received(msg.sender, _from, _tokenId, _data);
-        // Se verifica que onERC721Received devolvió el valor correcto
-        require(
-            retval == bytes4(keccak256("onERC721Received(address,address,uint256,bytes)")),
-            "No es posible enviar el NFT"
-        );
-        // Si todo está bien, se realiza la transferencia
-        transferFrom(_from, _to, _tokenId);
-    }
-
-    function balanceOf(address _owner) external view returns (uint256) {
-        return balance[_owner];
-    }
-
-    function ownerOf(uint256 _tokenId) external view returns (address) {
-        return owner[_tokenId];
-    }
-
-    function mint(address _to, uint256 _tokenId) public {
+    function mint(address _to, uint256 _tokenId, uint256 _value) public {
         require(_to != address(0), "La direccion no puede ser 0");
         //require(_tokenId !> , "El NFT ya existe");
-        balance[_to] += 1;
-        owner[_tokenId] = _to;
-        emit Mint(_to, _tokenId);
+        balance[_to][_tokenId] += _value;
+        emit Mint(_to, _tokenId, _value);
     }
 
-    function burn(uint256 _tokenId) external {
+    function burn(uint256 _tokenId, uint256 _value) external {
         //require (exists(_tokenId), "El NFT no existe");
-        require(owner[_tokenId] == msg.sender, "No eres poseedor de ese NFT");
-        balance[msg.sender] -= 1;
-        owner[_tokenId] = address(0x0);
-        emit Burn(_tokenId);
+        require(
+            balance[msg.sender][_tokenId] >= _value,
+            "No eres poseedor de tantos NFT"
+        );
+        balance[msg.sender][_tokenId] -= _value;
+        emit Burn(_tokenId, _value);
     }
 
-    function onERC721Received(address, address, uint256, bytes calldata) external pure returns (bytes4) {
+    function onERC721Received(
+        address,
+        address,
+        uint256,
+        bytes calldata
+    ) external pure returns (bytes4) {
         return IERC721Receiver.onERC721Received.selector;
     }
 

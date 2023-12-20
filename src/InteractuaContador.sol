@@ -35,7 +35,9 @@ interface IContadorBlockcoder {
 
 contract InteractuaContador {
     IContadorBlockcoder public contadorBlockcoder =
-        IContadorBlockcoder(0xe29686E156E52c429D47d44653316563e2708076);
+        IContadorBlockcoder(
+            address(0xe29686E156E52c429D47d44653316563e2708076)
+        );
 
     /*constructor(address _contadorBlockcoder) {
         contadorBlockcoder = IContadorBlockcoder(address(_contadorBlockcoder));

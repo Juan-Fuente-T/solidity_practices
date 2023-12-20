@@ -4,6 +4,14 @@ pragma solidity ^0.8.21;
 import {Test, console, console2} from "lib/forge-std/src/Test.sol";
 import {InteractuaContador} from "../src/InteractuaContador.sol";
 
+interface IContadorBlockcoder {
+    function increment() external;
+
+    function decrement() external;
+
+    function counter() external view returns (uint256);
+}
+
 contract InteractuaContadorTest is Test {
     InteractuaContador public interactuaContador;
     uint256 sepoliaFork;
@@ -14,8 +22,10 @@ contract InteractuaContadorTest is Test {
 
     function setUp() public {
         interactuaContador = new InteractuaContador();
-        sepoliaFork = vm.createFork(SEPOLIA_RPC_URL);
-        vm.selectFork(sepoliaFork);
+
+        //sepoliaFork = vm.createFork(SEPOLIA_RPC_URL);
+        //vm.selectFork(sepoliaFork);
+        vm.createSelectFork(SEPOLIA_RPC_URL);
         assertEq(vm.activeFork(), sepoliaFork);
     }
 

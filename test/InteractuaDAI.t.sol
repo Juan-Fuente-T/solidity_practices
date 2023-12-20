@@ -4,25 +4,37 @@ pragma solidity ^0.8.21;
 import {Test, console, console2} from "lib/forge-std/src/Test.sol";
 import {InteractuaDAI} from "../src/InteractuaDAI.sol";
 
+interface IDAI {
+    function name() external view returns (string memory);
+
+    function totalSupply() external view returns (uint256);
+}
+
 contract InteractuaDAITest is Test {
-    InteractuaDAI public interactuaDAI;
+    //InteractuaDAI public interactuaDAI;
+    InteractuaDAI public dai;
+    //IDAI dai;
     uint256 mainnetFork;
     string MAINNET_RPC_URL = vm.envString("MAINNET_RPC_URL");
 
-    //event Deposited(address indexed depositor, uint256 indexed amount);
-    //event Withdraw(address indexed withdrawer, uint256 indexed amount);
-
     function setUp() public {
-        interactuaDAI = new InteractuaDAI();
-        mainnetFork = vm.createFork(MAINNET_RPC_URL);
-        vm.selectFork(mainnetFork);
-        assertEq(vm.activeFork(), mainnetFork);
+        vm.createSelectFork(MAINNET_RPC_URL);
+        address interactuaDAI = 0x6B175474E89094C44Da98b954EedeAC495271d0F;
+        //dai = IDAI(interactuaDAI);
+        dai = new InteractuaDAI();
+        //mainnetFork = vm.createFork(MAINNET_RPC_URL);
+        //vm.selectFork(mainnetFork);
+        //assertEq(vm.activeFork(), mainnetFork);
     }
 
-    function testInteractuaDAI() public {
-        console.log("HOLA");
-        assertEq("Dai Stablecoin", interactuaDAI.consultaNombreDAI());
-        console2.log("DAIName", interactuaDAI.consultaNombreDAI());
+    function testInteractuaDAIName() public {
+        console2.log("DAIName", dai.consultaNombreDAI());
+        assertEq("Dai Stablecoin", dai.consultaNombreDAI());
+    }
+
+    function testInteractuaDAISupply() public {
+        assertGt(dai.consultaTotalSupply(), 100 * 1e18);
+        console2.log("Supply", dai.consultaTotalSupply() / (1e18));
     }
 }
 
