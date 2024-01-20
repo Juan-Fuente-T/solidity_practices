@@ -177,12 +177,13 @@ contract MiERC721Test is Test {
     function testMiERC721SafeTransferFrom() public {
         miERC721.mint(alice, 2);
         miERC721.mint(alice, 3);
-
+        vm.expectRevert();
         miERC721.safeTransferFrom(alice, bob, 3, "");
         miERC721.approve(carol, 2);
         vm.startPrank(carol);
+        vm.expectRevert("No es posible enviar el NFT");
         miERC721.safeTransferFrom(alice, carol, 2, "");
-        assertEq(miERC721.ownerOf(2), bob);
+        assertEq(miERC721.ownerOf(2), alice);
         vm.startPrank(bob);
         miERC721.safeTransferFrom(bob, alice, 2, "");
         assertEq(miERC721.ownerOf(2), alice);

@@ -1,0 +1,53 @@
+## Setting up (1) EVMs.
+
+==========================
+
+Chain 11155111
+
+Estimated gas price: 121.310599947 gwei
+
+Estimated total gas used for script: 1463613
+
+Estimated amount required: 0.177551771120228511 ETH
+
+==========================
+
+###
+Finding wallets for all the necessary addresses...
+##
+Sending transactions [0 - 3].
+⠚ [00:00:00] [###################################] 4/4 txes (0.0s)Transactions saved to: C:/Users/Juan/Desktop/Programacion/Blockchain/Ejercicios_Blockcoder_SOL/Noviembre\broadcast\Proxy1967_UUPS.s.sol\11155111\run-latest.json
+
+Sensitive values saved to: C:/Users/Juan/Desktop/Programacion/Blockchain/Ejercicios_Blockcoder_SOL/Noviembre/cache\Proxy1967_UUPS.s.sol\11155111\run-latest.json
+
+##
+Waiting for receipts.
+⠒ [00:00:07] [###############################] 4/4 receipts (0.0s)##### sepolia
+✅  [Success]Hash: 0x5b97f0770f00ec5a6ce2584a636f49ef7915600eddd091
+3b0d606d5397d6c572
+Contract Address: 0x2612FE2F5a364Ca226EA165f41435E85E3FA767f      
+Block: 5108782
+Paid: 0.035966654499818592 ETH (473211 gas * 76.005533472 gwei)   
+
+
+##### sepolia
+✅  [Success]Hash: 0xee65490563d53dba990faf9635d66fee5787cf74d0900e
+2c1c4483a9fe7953b5
+Contract Address: 0xDff86b1bf6AfBb1405C35C741994723B21983C91      
+Block: 5108782
+Paid: 0.010784653160942496 ETH (141893 gas * 76.005533472 gwei)   
+
+
+##### sepolia
+✅  [Success]Hash: 0x342c764970cd42ca0b1b1de6f881fa6f4bbf5ec13a3195
+6fb2e55989e57b0e73
+Contract Address: 0x23A447DF16c65bf64c6FeE7891466Ce547A75648      
+Block: 5108782
+Paid: 0.035966654499818592 ETH (473211 gas * 76.005533472 gwei)   
+
+
+##### sepolia
+✅  [Success]Hash: 0x118c808af481fa04ee75a01db2c4fad8aab4a001126e7e
+f074c81458ddc0776c
+Block: 5108782
+Paid: 0.00268565552523312 ETH (35335 gas * 76.005533472 gwei)  

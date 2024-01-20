@@ -23,7 +23,9 @@ Codingheroes
     2. Testear la funcionalidad completa de tu contrato InteractuaContador.sol*/
 
 // SPDX-License-Identifier: AGPL-3.0-only
-pragma solidity ^0.8.21;
+pragma solidity ^0.8.20;
+
+import {console} from "lib/forge-std/src/Test.sol";
 
 interface IContadorBlockcoder {
     function increment() external;
@@ -34,24 +36,35 @@ interface IContadorBlockcoder {
 }
 
 contract InteractuaContador {
-    IContadorBlockcoder public contadorBlockcoder =
+    /*IContadorBlockcoder public contadorBlockcoder =
         IContadorBlockcoder(
             address(0xe29686E156E52c429D47d44653316563e2708076)
-        );
+        );*/
+    IContadorBlockcoder public contadorBlockcoder;
 
-    /*constructor(address _contadorBlockcoder) {
-        contadorBlockcoder = IContadorBlockcoder(address(_contadorBlockcoder));
-    }*/
+    constructor(address _contadorBlockcoder) {
+        contadorBlockcoder = IContadorBlockcoder(_contadorBlockcoder);
+        console.log("_contadorBlockcoder");
+        console.log(_contadorBlockcoder);
+        console.log("contadorBlockcoder");
+        console.logAddress(address(contadorBlockcoder));
+    }
 
-    function incrementaContador() external {
+    function incrementaContador() public {
+        console.log("Incrementando contador");
+        console.logAddress(address(contadorBlockcoder));
         contadorBlockcoder.increment();
     }
 
-    function decrementaContador() external {
+    function decrementaContador() public {
+        console.log("Decrementando contador");
+        console.logAddress(address(contadorBlockcoder));
         contadorBlockcoder.decrement();
     }
 
-    function consultaContador() external view returns (uint256) {
+    function consultaContador() public view returns (uint256) {
+        console.log("Consultando contador");
+        console.logAddress(address(contadorBlockcoder));
         return contadorBlockcoder.counter();
     }
 }

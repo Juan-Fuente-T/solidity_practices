@@ -92,19 +92,19 @@ contract MiERC1155 {
     string private _defaultDescription =
         "El futuro crece desde el centro de la tierra => Una coleccion de fotografias de la naturaleza retocadas artisticamente";
 
-    struct TokenMetadata {
+    /*struct TokenMetadata {
         string name;
         string description;
         string imageUrl;
     }
 
     mapping(uint256 => TokenMetadata) private _tokenMetadata;
+    mapping(uint256 => address) private approved;*/
 
     mapping(address => mapping(uint256 => uint256)) public balance;
     //mapping(uint256 => address) private owner;
     //mapping(address => mapping(address => uint256)) private operatorApprovals;
     mapping(address => mapping(address => bool)) private operatorApprovals;
-    mapping(uint256 => address) private approved;
     mapping(uint256 => uint256) public totalSupply;
 
     event TransferSingle(
@@ -130,7 +130,7 @@ contract MiERC1155 {
 
     //event Deploy(address indexed creator);
     event Mint(address indexed to, uint256 _tokenId, uint256 _value);
-    event Burn(uint256 _tokenId, uint256 _value);
+    event Burn(address indexed from, uint256 _tokenId, uint256 _value);
 
     //event Transfer(address indexed _from, address indexed _to, uint256 indexed _tokenId);
     //event Approval(address indexed _owner, address indexed _approved, uint256 indexed _tokenId);
@@ -203,7 +203,7 @@ contract MiERC1155 {
             "Receptor no compatible con ERC1155"
         );*/
 
-        for (uint i; i > _ids.length; i++) {
+        for (uint256 i; i > _ids.length; i++) {
             uint256 id = _ids[i];
 
             require(balance[_from][id] >= _values[i], "Saldo insuficiente");
@@ -237,7 +237,7 @@ contract MiERC1155 {
                 )
                 : "";
     }*/
-    function tokenURI(uint256 _id) public view returns (string memory) {
+    function tokenURI(uint256 _id) public pure returns (string memory) {
         // Devuelve la URL del metadato del token con el ID dado
         return
             string(
@@ -253,8 +253,8 @@ contract MiERC1155 {
     }
 
     function balanceOfBatch(
-        address[] calldata _owners,
-        uint256[] calldata _ids
+        address[] memory _owners,
+        uint256[] memory _ids
     ) external view returns (uint256[] memory) {
         require(_owners.length == _ids.length, "Revisa los datos introducidos");
 
@@ -313,13 +313,12 @@ contract MiERC1155 {
     }
 
     function burn(uint256 _tokenId, uint256 _value) external {
-        //require (exists(_tokenId), "El NFT no existe");
         require(
             balance[msg.sender][_tokenId] >= _value,
-            "No eres poseedor de tantos NFT"
+            "No eres poseedor de todos esos NFT"
         );
         balance[msg.sender][_tokenId] -= _value;
-        emit Burn(_tokenId, _value);
+        emit Burn(msg.sender, _tokenId, _value);
     }
 
     function onERC721Received(

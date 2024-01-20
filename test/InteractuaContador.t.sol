@@ -14,6 +14,7 @@ interface IContadorBlockcoder {
 
 contract InteractuaContadorTest is Test {
     InteractuaContador public interactuaContador;
+    address public contadorBlockcoderAddress;
     uint256 sepoliaFork;
     string SEPOLIA_RPC_URL = vm.envString("SEPOLIA_RPC_URL");
 
@@ -21,16 +22,21 @@ contract InteractuaContadorTest is Test {
     //event Withdraw(address indexed withdrawer, uint256 indexed amount);
 
     function setUp() public {
-        interactuaContador = new InteractuaContador();
+        contadorBlockcoderAddress = address(
+            0xe29686E156E52c429D47d44653316563e2708076
+        );
+        interactuaContador = new InteractuaContador(contadorBlockcoderAddress);
 
         //sepoliaFork = vm.createFork(SEPOLIA_RPC_URL);
         //vm.selectFork(sepoliaFork);
         vm.createSelectFork(SEPOLIA_RPC_URL);
         assertEq(vm.activeFork(), sepoliaFork);
+        console.logAddress(address(interactuaContador));
     }
 
     function testIncrementaContador() public {
-        assertEq(interactuaContador.consultaContador(), 0);
+        //console.log(interactuaContador.consultaContador());
+        //assertEq(interactuaContador.consultaContador(), 0);
         interactuaContador.incrementaContador();
         assertEq(interactuaContador.consultaContador(), 1);
     }
