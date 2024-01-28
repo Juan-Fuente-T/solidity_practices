@@ -13,11 +13,14 @@ contract MyScript is Script {
     function setUp() public {}
 
     function run() external {
-        uint256 deployerPrivateKey = vm.envUint("MI_PRIVATE_KEY");
+        uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
         vm.startBroadcast(deployerPrivateKey);
         //vm.broadcast();
         ImplementationV1 implementationV1 = new ImplementationV1();
-        Proxy1967_UUPS proxy = new Proxy1967_UUPS(address(implementationV1));
+        Proxy1967_UUPS proxy = new Proxy1967_UUPS(
+            address(implementationV1),
+            abi.encodeWithSignature("initialize()")
+        );
         ImplementationV2 implementationV2 = new ImplementationV2();
         (bool success, ) = address(proxy).call(
             abi.encodeWithSignature(

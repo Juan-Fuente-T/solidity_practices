@@ -1,34 +1,45 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.21;
+pragma solidity ^0.8.20;
 
 import {Test, console, console2} from "lib/forge-std/src/Test.sol";
 import {Proxy1967_UUPS} from "../src/Proxy1967_UUPS.sol";
 import {ImplementationV1} from "../src/ImplementationV1.sol";
 import {ImplementationV2} from "../src/ImplementationV2.sol";
 
+interface IImplementation {
+    function upgradeToAndCall(address, bytes memory) external payable;
+}
+
 contract Proxy1967_UUPSTest is Test {
     Proxy1967_UUPS public proxy1967_UUPS;
     ImplementationV1 public implementation;
     ImplementationV2 public implementationV2;
-    uint256 sepoliaFork;
-    string SEPOLIA_RPC_URL = vm.envString("SEPOLIA_RPC_URL");
 
-    /**function setUp() public {
+    //uint256 sepoliaFork;
+    //string SEPOLIA_RPC_URL = vm.envString("SEPOLIA_RPC_URL");
+
+    function setUp() public {
         implementation = new ImplementationV1();
-        proxy1967_UUPS = new Proxy1967_UUPS(address(implementation));
+        proxy1967_UUPS = new Proxy1967_UUPS(
+            address(implementation),
+            abi.encodeWithSignature("initialize()")
+        );
         implementationV2 = new ImplementationV2();
         console.logAddress(address(implementation));
         console.logAddress(address(implementationV2));
-    }*/
+        console.log("Owner", implementation.owner());
+    }
+
     //Setup para fork:
 
-    function setUp() public {
+    /* function setUp() public {
         implementation = ImplementationV1(
             address(0x2612FE2F5a364Ca226EA165f41435E85E3FA767f)
         );
         //proxy1967_UUPS = Proxy1967_UUPS(address(0x78070uu878u8yu8uyo98yuiu9u098));
         //proxy1967_UUPS = "0xDff86b1bf6AfBb1405C35C741994723B21983C91";
-        proxy1967_UUPS = new Proxy1967_UUPS(address(implementation));
+        proxy1967_UUPS = new Proxy1967_UUPS(address(implementation), bytes(""));
+        //proxy1967_UUPS = new Proxy1967_UUPS(address(implementation), );
         implementationV2 = ImplementationV2(
             address(0x23A447DF16c65bf64c6FeE7891466Ce547A75648)
         );
@@ -38,7 +49,7 @@ contract Proxy1967_UUPSTest is Test {
         //vm.selectFork(sepoliaFork);
         vm.createSelectFork(SEPOLIA_RPC_URL);
         assertEq(vm.activeFork(), sepoliaFork);
-    }
+    }*/
 
     function testAdditionV1() public {
         console.log("Funciona");
@@ -90,12 +101,17 @@ contract Proxy1967_UUPSTest is Test {
     function testProxyUpgrade() public {
         console.log("ImplementationAntes", proxy1967_UUPS.getImplementation());
         assertEq(address(implementation), proxy1967_UUPS.getImplementation());
-        (bool success, ) = address(proxy1967_UUPS).call(
+        /*(bool success, ) = address(proxy1967_UUPS).call(
             abi.encodeWithSignature(
                 "upgradeToAndCall(address,bytes)",
                 address(implementationV2),
                 ""
             )
+        );*/
+        //alternativa para hacer la llamada sin hacer call, usar una interface para llamar directamente a la funcion
+        IImplementation(address(proxy1967_UUPS)).upgradeToAndCall(
+            address(implementationV2),
+            ""
         );
         console.log(
             "ImplementationDespues",

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.21;
+pragma solidity ^0.8.4;
 
 import {Test, console, console2} from "lib/forge-std/src/Test.sol";
 import {InteractuaContador} from "../src/InteractuaContador.sol";

@@ -23,9 +23,9 @@ Codingheroes
     2. Testear la funcionalidad completa de tu contrato InteractuaContador.sol*/
 
 // SPDX-License-Identifier: AGPL-3.0-only
-pragma solidity ^0.8.20;
+pragma solidity ^0.8.4;
 
-import {console} from "lib/forge-std/src/Test.sol";
+import {console} from "forge-std/Test.sol";
 
 interface IContadorBlockcoder {
     function increment() external;

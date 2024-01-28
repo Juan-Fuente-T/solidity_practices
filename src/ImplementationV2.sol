@@ -1,11 +1,31 @@
-//SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.20;
 
-import {UUPSUpgradeable} from "@openzeppelin/contracts/proxy/utils/UUPSUpgradeable.sol";
+import "@openzeppelin/contracts/proxy/utils/UUPSUpgradeable.sol";
 
 contract ImplementationV2 is UUPSUpgradeable {
-    function _authorizeUpgrade(address newImplementation) internal override {
-        // Lógica de autorización para la actualización de la implementación
+    address public owner;
+
+    constructor() {
+        owner = msg.sender;
+    }
+
+    modifier onlyOwner() {
+        require(
+            msg.sender == owner,
+            "Only the contract's owner can call this method"
+        );
+        _;
+    }
+
+    function initialize() external {
+        owner = msg.sender;
+    }
+
+    function _authorizeUpgrade(
+        address newImplementation
+    ) internal override onlyOwner {
+        // Posible lógica de autorización para la actualización de la implementación
     }
 
     function addition(

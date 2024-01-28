@@ -15,6 +15,7 @@ contract ImplementationV1 is UUPSUpgradeable {
             msg.sender == owner,
             "Only the contract's owner can call this method"
         );
+        _;
     }
 
     function initialize() external {
